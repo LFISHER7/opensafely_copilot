@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block head %}
+<link
+    href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/themes/prism-tomorrow.min.css"
+    rel="stylesheet" />
+
+{% endblock %}
+{% block content %}
+<div class="bg-red-500 py-2 px-4 text-white text-center sticky top-0">
+    <p>This is a toy app for demonstration purposes only.</p>
+</div>
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-semibold mb-2 text-center">OpenSAFELY Co-Pilot</h1>
+    <h1 class="text-3xl font-semibold mb-4">Ask a Question</h1>
+    <p class="text-lg text-gray-600 mb-8">Get answers from the <a
+            class="font-semibold hover:text-blue-500"
+            href="https://docs.opensafely.org/">OpenSAFELY documentation</a>
+        your questions by simply typing them below, and our co-pilot will
+        provide you with the most relevant information.</p>
+    <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="question" class="block text-gray-700 text-sm font-bold
+                mb-2">Your question:</label>
+            <input type="text" name="question" id="question" class="shadow
+                appearance-none border rounded w-full py-2 px-3 text-gray-700
+                leading-tight focus:outline-none focus:shadow-outline" required
+                placeholder="Enter your question here">
+            <label for="system_message" class="block text-gray-700 text-sm font-bold
+                mb-2">System message (optional):</label>
+            <input type="text" name="system_message" id="system_message" class="shadow
+                appearance-none border rounded w-full py-2 px-3 text-gray-700
+                leading-tight focus:outline-none focus:shadow-outline"
+                placeholder="Enter optional system message">
+        </div>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white
+            font-bold py-2 px-4 rounded focus:outline-none
+            focus:shadow-outline">Ask</button>
+    </form>
+    {% if answer %}
+    <h2 class="text-2xl font-semibold mb-2">Answer:</h2>
+    <div class="bg-white shadow-md rounded p-6 mb-6">
+        {% for a in answer %}
+        {% if forloop.counter0 in code_block_indices %}
+        <pre>
+            <code class="language-python py-1">{{ a }}</code>
+        </pre>
+        {% else %}
+        <p>{{ a }}</p>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    {% endif %}
+
+    {% if supporting_text %}
+    <h2 class="text-2xl font-semibold mb-4">Supporting text:</h2>
+    {% for link, text in supporting_text.items %}
+    <div class="bg-white shadow-md rounded p-6 mb-4">
+        <a href="{{ link }}" target="_blank" class="text-blue-500 hover:text-blue-700">{{ text }}</a>
+    </div>
+    {% endfor %}
+    <a href="{% url 'index' %}" class="bg-red-500 hover:bg-red-700 text-white
+        font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        Clear Answer
+    </a>
+    {% endif %}
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/prism.min.js"></script>
+{% endblock %}

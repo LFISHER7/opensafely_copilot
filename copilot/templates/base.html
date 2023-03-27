@@ -1,0 +1,20 @@
+{% load static %}
+{% load static tailwind_tags %}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OpenSAFELY Co-pilot</title>
+  {% tailwind_css %}
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+    <div>
+    {% block content %}
+    {% endblock %}
+    </div>
+  {% block scripts%}
+  {% endblock %}
+</body>
+</html>
