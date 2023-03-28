@@ -77,7 +77,8 @@ def index(request, system_message=None):
         if system_message == '':
             system_message = None
         
-
+        print(f'QUERY: {query}')
+        print(f'SYSTEM MESSAGE: {system_message}')
 
         # Get the vector representation of the query using OpenAI's Text Embedding API
         query_embedding = get_embedding(query)
@@ -106,7 +107,7 @@ def index(request, system_message=None):
             else:   
                 supporting = f"{subheader}: {header.replace('#', '')}"
             supporting_text[link] = supporting
-
+        print(f'SUPPORTING TEXT: {supporting_text}')
         # Generate an answer to the user's query using  GPT-3.5
         if system_message is None:
             print('NO SYSTEM MESSAGE. Using default')
