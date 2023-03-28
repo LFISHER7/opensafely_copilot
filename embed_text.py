@@ -67,7 +67,7 @@ def process_files(input_dir, index_name):
             if gpt3_embedding is not None:
                 key = link
                 index = pinecone.Index(index_name)
-                index.upsert([(key, gpt3_embedding)])
+                index.upsert([(key, gpt3_embedding,  {"text": plain_text})])
                 # Wait for 1 second to avoid rate limit
                 time.sleep(1)
 

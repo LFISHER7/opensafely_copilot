@@ -14,12 +14,13 @@ pinecone_api_key = os.getenv("PINECONE_API_KEY")
 # Initialize Pinecone with the API key and select the index
 pinecone.init(api_key=pinecone_api_key, environment='us-west4-gcp')
 pinecone_index = pinecone.Index(os.getenv("PINECONE_INDEX_NAME"))
-print(pinecone.list_indexes())
+
 def get_embedding(text, model="text-embedding-ada-002"):
     """
     Get the embedding for the given text using the OpenAI API.
     """
     text = text.replace("\n", " ")
+    
     return openai.Embedding.create(input=[text], model=model)['data'][0]['embedding']
 
 def generate_answer(question="", supporting_text=[], system_message="You are a helpful assistant that can answer questions about the OpenSAFELY platform using the supporting text provided. If the answer is not in the supporting text, you can say 'No similar text found in the documentation'. You can include code blocks where appropriate."):
@@ -28,11 +29,11 @@ def generate_answer(question="", supporting_text=[], system_message="You are a h
     """
     if len(supporting_text) == 0:
         return "No similar text found in the documentation. Please try again."
-
+    
     # Define the chat messages for the OpenAI API
     messages = [
         {"role": "system", "content": system_message},
-        {"role": "user", "content": f"The supporting texts from the documentation are: {[supporting_text[i] for i in supporting_text]}"},
+        {"role": "user", "content": f"The supporting texts from the documentation are: {supporting_text}"},
         {"role": "user", "content": "What is the answer to the question?"},
         {"role": "user", "content": question}
     ]
@@ -61,7 +62,7 @@ def query_pinecone(query_vector, top_k=5):
         include_values=False,
         include_metadata=True
     )
-    print(f"Results: {results}")
+    
     return results
 
 def index(request, system_message=None):
@@ -90,9 +91,10 @@ def index(request, system_message=None):
         # Search the Pinecone index to find the documents most similar to the query
         embeddings = query_pinecone(query_embedding, top_k=5)
         matches = embeddings['matches']
-  
+      
         # Create a dictionary of links to supporting text for each matching document
         supporting_text = {}
+        
         for i in matches:
             link = i['id']
             header = link.split('/')[-1]
@@ -107,19 +109,28 @@ def index(request, system_message=None):
             # Combine the subheader and header into a string representing the location of the supporting text
             
             if subheader == 'Docs.opensafely.org':
-                supporting = header.replace('#', '')
-            else:   
-                supporting = f"{subheader}: {header.replace('#', '')}"
-            supporting_text[link] = supporting
-        print(f'SUPPORTING TEXT: {supporting_text}')
+                subheader = header.replace('#', '')
+                 
+            full_heading = f"{subheader}: {header.replace('#', '')}"
+          
+
+            text = i['metadata']['text']
+            supporting_text[link] = [full_heading, text]
+        
+        supporting_text_content = [supporting_text[i][1] for i in supporting_text]
+        
+        supporting_text_headers = {i: supporting_text[i][0] for i in supporting_text}
+        
+    
         # Generate an answer to the user's query using  GPT-3.5
         if system_message is None:
             print('NO SYSTEM MESSAGE. Using default')
-            answer = generate_answer(query, supporting_text)
+            answer = generate_answer(query, supporting_text_content)
         else:
             print('SYSTEM MESSAGE. Using custom')
             print(f'SYSTEM MESSAGE: {system_message}')
-            answer = generate_answer(query, supporting_text, system_message=system_message)
+            
+            answer = generate_answer(query, supporting_text_content, system_message=system_message)
 
         # If the answer contains a code block, as indicated by ``` at the start and end of the answer, 
         # then separate out the code blocks from the text
@@ -136,8 +147,9 @@ def index(request, system_message=None):
             answer = [answer]
             code_block_indices = []
 
+        
         # Render the index.html template with the answer, supporting text, and code block information
-        return render(request, 'index.html', {'answer': answer, 'supporting_text': supporting_text, 'code_block_indices': code_block_indices})
+        return render(request, 'index.html', {'answer': answer, 'supporting_text': supporting_text_headers, 'code_block_indices': code_block_indices})
 
     # When a GET request is received
     return render(request, 'index.html', {'answer': answer})
