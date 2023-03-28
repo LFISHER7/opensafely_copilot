@@ -21,7 +21,7 @@ def get_embedding(text, model="text-embedding-ada-002"):
     text = text.replace("\n", " ")
     return openai.Embedding.create(input=[text], model=model)['data'][0]['embedding']
 
-def generate_answer(question="", supporting_text=[], system_message="You are a helpful assistant that can answer questions about the OpenSAFELY platform using the supporting text provided. If the answer is not in the supporting text, you can say 'No similar text found in the documentation. You can include code blocks where appropriate.'"):
+def generate_answer(question="", supporting_text=[], system_message="You are a helpful assistant that can answer questions about the OpenSAFELY platform using the supporting text provided. If the answer is not in the supporting text, you can say 'No similar text found in the documentation'. You can include code blocks where appropriate."):
     """
     Generate an answer to the given question using the OpenAI GPT-3.5 API.
     """
