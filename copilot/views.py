@@ -60,6 +60,7 @@ def query_pinecone(query_vector, top_k=5):
         include_values=False,
         include_metadata=True
     )
+    print(f"Results: {results}")
     return results
 
 def index(request, system_message=None):
