@@ -9,11 +9,12 @@ load_dotenv()
 # Get the OpenAI and Pinecone API keys from the .env file
 openai.api_key = os.getenv("OPENAI_API_KEY")
 pinecone_api_key = os.getenv("PINECONE_API_KEY")
+  
 
 # Initialize Pinecone with the API key and select the index
 pinecone.init(api_key=pinecone_api_key, environment='us-west4-gcp')
 pinecone_index = pinecone.Index(os.getenv("PINECONE_INDEX_NAME"))
-
+print(pinecone.list_indexes())
 def get_embedding(text, model="text-embedding-ada-002"):
     """
     Get the embedding for the given text using the OpenAI API.
@@ -53,7 +54,7 @@ def query_pinecone(query_vector, top_k=5):
     Query the Pinecone index with the given query vector and return the top-k results.
     """
     print("Querying Pinecone index...")
-    print(f"Query vector: {query_vector}")
+  
     results = pinecone_index.query(
         vector=query_vector,
         top_k=top_k,
