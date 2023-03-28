@@ -52,6 +52,8 @@ def query_pinecone(query_vector, top_k=5):
     """
     Query the Pinecone index with the given query vector and return the top-k results.
     """
+    print("Querying Pinecone index...")
+    print(f"Query vector: {query_vector}")
     results = pinecone_index.query(
         vector=query_vector,
         top_k=top_k,
